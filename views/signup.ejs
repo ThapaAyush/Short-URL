@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create account | Linkboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        :root { --ink:#16252b; --muted:#66757a; --paper:#f6f4ef; --teal:#084c4a; --coral:#e87857; --yellow:#f5ca65; --line:#dce2dd; }
+        * { box-sizing:border-box; }
+        body { align-items:center; background-color:var(--paper); background-image:linear-gradient(rgba(13,107,104,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(13,107,104,.035) 1px,transparent 1px); background-size:32px 32px; color:var(--ink); display:flex; font-family:'DM Sans',sans-serif; justify-content:center; margin:0; min-height:100vh; padding:24px; }
+        .auth-shell { background:white; box-shadow:0 24px 70px rgba(22,37,43,.12); display:grid; grid-template-columns:.9fr 1.1fr; max-width:900px; min-height:570px; width:100%; }
+        .story { background:var(--teal); color:white; overflow:hidden; padding:42px; position:relative; }
+        .story:after { border:1px solid rgba(245,202,101,.5); border-radius:50%; bottom:-100px; content:''; height:300px; position:absolute; right:-95px; width:300px; }
+        .brand { align-items:center; display:flex; gap:11px; text-decoration:none; }
+        .brand-mark { align-items:center; background:var(--yellow); border-radius:9px; color:var(--ink); display:flex; font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; height:36px; justify-content:center; transform:rotate(-8deg); width:36px; }
+        .brand-name { color:white; font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:700; }
+        .brand-name span { color:var(--coral); }
+        .story h1 { font-family:'Space Grotesk',sans-serif; font-size:42px; letter-spacing:-2px; line-height:1; margin:118px 0 16px; max-width:280px; }
+        .story p { color:#b9d8d3; font-size:14px; line-height:1.7; max-width:270px; }
+        .form-side { align-items:center; display:flex; padding:42px clamp(28px,6vw,76px); }
+        .form-inner { width:100%; }
+        .eyebrow { color:var(--coral); font-size:11px; font-weight:700; letter-spacing:.16em; margin:0 0 12px; text-transform:uppercase; }
+        h2 { font-family:'Space Grotesk',sans-serif; font-size:31px; letter-spacing:-1px; margin:0 0 9px; }
+        .subtitle { color:var(--muted); font-size:14px; line-height:1.5; margin:0 0 28px; }
+        .error { background:#fff1ed; border-left:3px solid var(--coral); color:#93432e; font-size:13px; margin-bottom:18px; padding:12px; }
+        label { color:var(--ink); display:block; font-size:12px; font-weight:700; margin:17px 0 7px; }
+        input { border:1px solid var(--line); color:var(--ink); font:inherit; min-height:48px; outline:0; padding:0 13px; width:100%; }
+        input:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(13,107,104,.12); }
+        button { background:var(--coral); border:0; color:white; cursor:pointer; font:700 14px 'DM Sans',sans-serif; margin-top:25px; min-height:49px; width:100%; }
+        button:hover { background:#d96343; }
+        .switch { color:var(--muted); font-size:13px; margin:22px 0 0; text-align:center; }
+        .switch a { color:var(--teal); font-weight:700; text-decoration:none; }
+        @media (max-width:650px) { .auth-shell{display:block}.story{min-height:220px;padding:28px}.story h1{font-size:34px;margin:55px 0 0}.story p{display:none}.form-side{padding:34px 28px} }
+    </style>
+</head>
+<body>
+    <main class="auth-shell">
+        <section class="story"><a class="brand" href="/"><span class="brand-mark">L</span><span class="brand-name">link<span>board</span></span></a><h1>Give your links a home.</h1><p>Build a focused collection of short links and see what happens after you share them.</p></section>
+        <section class="form-side"><div class="form-inner"><p class="eyebrow">Start simply</p><h2>Create your workspace</h2><p class="subtitle">A better home for every destination you share.</p><% if (typeof error !== "undefined") { %><div class="error"><%= error %></div><% } %><form action="/user" method="POST"><label for="name">Your name</label><input id="name" type="text" name="name" autocomplete="name" required><label for="email">Email address</label><input id="email" type="email" name="email" autocomplete="email" required><label for="password">Password</label><input id="password" type="password" name="password" autocomplete="new-password" required><button type="submit">Create account</button></form><p class="switch">Already have an account? <a href="/login">Sign in</a></p></div></section>
+    </main>
+</body>
+</html>
