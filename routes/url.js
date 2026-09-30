@@ -1,5 +1,5 @@
 const express = require("express");
-const { nanoid } = require("nanoid");
+const crypto = require("crypto");
 const URL = require("../models/url");
 
 const router = express.Router();
@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
         return res.status(400).send("URL is required");
     }
 
-    const shortId = nanoid(8);
+    const shortId = crypto.randomBytes(6).toString("base64url");
 
     await URL.create({
         shortId: shortId,
