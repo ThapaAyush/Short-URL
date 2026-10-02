@@ -1,77 +1,56 @@
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const { PORT, MONGO_URL } = require("./config");
 const { connectToMongoDB } = require("./connect");
+const { checkForAuthentication, restrictTo } = require("./middlewares/auth");
+const { handleRedirect } = require("./controllers/url");
 const urlRoute = require("./routes/url");
-const {
-    checkForAuthentication,
-    restrictTo,
-    restrictToLoggedinUserOnly,
-} = require("./middlewares/auth");
-const URL = require("./models/url");
 const staticRoute = require("./routes/staticRouter");
 const userRoute = require("./routes/user");
 
 const app = express();
 
-const PORT = 8001;
+app.disable("x-powered-by");
+app.set("view engine", "ejs");
+app.set("views", path.resolve(__dirname, "views"));
 
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(checkForAuthentication);
 
-app.set("view engine", "ejs");
+app.use("/url", restrictTo("NORMAL", "ADMIN"), urlRoute);
+app.use("/user", userRoute);
+app.use("/", staticRoute);
 
-app.set("views", path.resolve("./views"));
+// Browsers request this automatically; don't treat it as a short ID.
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+app.get("/:shortId", handleRedirect);
 
-app.get("/test", restrictToLoggedinUserOnly, async (req, res) => {
-    const query = req.user.role === "ADMIN" ? {} : { createdBy: req.user._id };
-    const userUrls = await URL.find(query).sort({ createdAt: -1 });
+app.use((req, res) => {
+    res.status(404).json({ error: "Not found" });
+});
 
-    return res.render("home", {
-        urls: userUrls,
-        user: req.user,
+// Express 5 forwards errors from async handlers here.
+app.use((err, req, res, next) => {
+    if (res.headersSent) return next(err);
+
+    const status = err.status || err.statusCode || 500;
+    if (status >= 500) console.error(err);
+    res.status(status).json({
+        error: status >= 500 ? "Something went wrong" : err.message,
     });
 });
 
-connectToMongoDB("mongodb://127.0.0.1:27017/short-url")
-    .then(() => console.log("Mongodb connected"))
-    .catch((err) => console.log("MongoDB connection error:", err));
-
-app.use("/url", restrictTo("NORMAL", "ADMIN"), urlRoute);
-
-app.use("/user", userRoute);
-
-app.use("/", staticRoute);
-
-
-app.get("/:shortId", async (req, res) => {
-    const shortId = req.params.shortId;
-
-    const entry = await URL.findOneAndUpdate(
-        {
-            shortId,
-        },
-        {
-            $push: {
-                visitHistory: {
-                    timestamp: Date.now(),
-                },
-            },
-        }
-    );
-
-    if (!entry) {
-        return res.status(404).json({
-            error: "Short URL not found",
+connectToMongoDB(MONGO_URL)
+    .then(() => {
+        console.log("MongoDB connected");
+        app.listen(PORT, () => {
+            console.log(`Server started at http://localhost:${PORT}`);
         });
-    }
-
-    return res.redirect(entry.redirectURL);
-});
-
-app.listen(PORT, () => {
-    console.log(`Server Started at PORT: ${PORT}`);
-});
+    })
+    .catch((err) => {
+        console.error("MongoDB connection error:", err.message);
+        process.exit(1);
+    });

@@ -1,47 +1,37 @@
 const { getUser } = require("../service/auth");
 
+// Attach req.user from either an "Authorization: Bearer <token>" header
+// (API clients) or the "uid" cookie (browser). Invalid tokens become null.
 function checkForAuthentication(req, res, next) {
-    const authorizationHeaderValue = req.headers["authorization"];
-    const userUid = req.cookies?.uid;
-    req.user = userUid ? getUser(userUid) : null;
+    const header = req.headers.authorization;
+    const bearerToken = header?.startsWith("Bearer ") ? header.slice(7) : null;
 
-    if (
-        !authorizationHeaderValue ||
-        !authorizationHeaderValue.startsWith("Bearer ")
-    )
-        return next();
-
-    const token = authorizationHeaderValue.split("Bearer ")[1];
-    const user = getUser(token);
-
-    req.user = user;
+    req.user = getUser(bearerToken || req.cookies?.uid);
     return next();
 }
 
 function restrictTo(...roles) {
     return function (req, res, next) {
         if (!req.user) return res.redirect("/login");
-        const userRole = req.user.role || "NORMAL";
-        if (!roles.includes(userRole)) return res.status(403).end("Unauthorized");
+        if (!roles.includes(req.user.role)) return res.status(403).send("Forbidden");
 
         return next();
     };
 }
 
 function restrictToLoggedinUserOnly(req, res, next) {
-    const userUid = req.cookies?.uid;
+    if (!req.user) return res.redirect("/login");
+    return next();
+}
 
-    if (!userUid) return res.redirect("/login");
-    const user = getUser(userUid);
-
-    if (!user) return res.redirect("/login");
-
-    req.user = user;
-    next();
+function redirectIfLoggedIn(req, res, next) {
+    if (req.user) return res.redirect("/");
+    return next();
 }
 
 module.exports = {
     checkForAuthentication,
     restrictTo,
     restrictToLoggedinUserOnly,
+    redirectIfLoggedIn,
 };
