@@ -34,6 +34,8 @@ Open http://localhost:8001 and create an account.
 | `JWT_SECRET` | dev-only fallback                      | **Required** when `NODE_ENV=production`        |
 | `BASE_URL`   | request host                           | Public address shown for short links           |
 
+For Vercel, set `MONGO_URL` to an internet-accessible MongoDB connection string and set a strong `JWT_SECRET` in the project's Environment Variables.
+
 ## Routes
 
 | Method | Path                       | Auth           | Description                                  |

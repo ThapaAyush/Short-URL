@@ -19,13 +19,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(checkForAuthentication);
+// Browsers request this automatically; it does not need a database connection.
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+app.use(async (req, res, next) => {
+    try {
+        await connectToMongoDB(MONGO_URL);
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
 
 app.use("/url", restrictTo("NORMAL", "ADMIN"), urlRoute);
 app.use("/user", userRoute);
 app.use("/", staticRoute);
 
-// Browsers request this automatically; don't treat it as a short ID.
-app.get("/favicon.ico", (req, res) => res.status(204).end());
 app.get("/:shortId", handleRedirect);
 
 app.use((req, res) => {
@@ -43,14 +52,18 @@ app.use((err, req, res, next) => {
     });
 });
 
-connectToMongoDB(MONGO_URL)
-    .then(() => {
-        console.log("MongoDB connected");
-        app.listen(PORT, () => {
-            console.log(`Server started at http://localhost:${PORT}`);
+if (require.main === module) {
+    connectToMongoDB(MONGO_URL)
+        .then(() => {
+            console.log("MongoDB connected");
+            app.listen(PORT, () => {
+                console.log(`Server started at http://localhost:${PORT}`);
+            });
+        })
+        .catch((err) => {
+            console.error("MongoDB connection error:", err.message);
+            process.exit(1);
         });
-    })
-    .catch((err) => {
-        console.error("MongoDB connection error:", err.message);
-        process.exit(1);
-    });
+}
+
+module.exports = app;
