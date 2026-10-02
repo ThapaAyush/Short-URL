@@ -37,7 +37,7 @@
 <body>
     <main class="auth-shell">
         <section class="story"><a class="brand" href="/"><span class="brand-mark">L</span><span class="brand-name">link<span>board</span></span></a><h1>Links that move with you.</h1><p>Your private workspace for creating, sharing, and understanding every short link.</p></section>
-        <section class="form-side"><div class="form-inner"><p class="eyebrow">Welcome back</p><h2>Sign in to Linkboard</h2><p class="subtitle">Pick up where you left off.</p><% if (typeof error !== "undefined") { %><div class="error"><%= error %></div><% } %><form action="/user/login" method="POST"><label for="email">Email address</label><input id="email" type="email" name="email" autocomplete="email" required><label for="password">Password</label><input id="password" type="password" name="password" autocomplete="current-password" required><button type="submit">Enter workspace</button></form><p class="switch">New to Linkboard? <a href="/signup">Create an account</a></p></div></section>
+        <section class="form-side"><div class="form-inner"><p class="eyebrow">Welcome back</p><h2>Sign in to Linkboard</h2><p class="subtitle">Pick up where you left off.</p><% if (typeof error !== "undefined") { %><div class="error"><%= error %></div><% } %><form action="/user/login" method="POST"><label for="email">Email address</label><input id="email" type="email" name="email" value="<%= locals.email || '' %>" autocomplete="email" required><label for="password">Password</label><input id="password" type="password" name="password" autocomplete="current-password" required><button type="submit">Enter workspace</button></form><p class="switch">New to Linkboard? <a href="/signup">Create an account</a></p></div></section>
     </main>
 </body>
 </html>

@@ -1,24 +1,19 @@
 const express = require("express");
-const URL = require("../models/url");
-const { restrictToLoggedinUserOnly } = require("../middlewares/auth");
+const { renderHome } = require("../controllers/url");
+const {
+    restrictToLoggedinUserOnly,
+    redirectIfLoggedIn,
+} = require("../middlewares/auth");
 
 const router = express.Router();
 
-router.get("/signup", (req, res) => {
+router.get("/signup", redirectIfLoggedIn, (req, res) => {
     return res.render("signup");
 });
-router.get("/login", (req, res) => {
+router.get("/login", redirectIfLoggedIn, (req, res) => {
     return res.render("login");
 });
 
-router.get("/", restrictToLoggedinUserOnly, async (req, res) => {
-    const query = req.user.role === "ADMIN" ? {} : { createdBy: req.user._id };
-    const userUrls = await URL.find(query).sort({ createdAt: -1 });
-
-    return res.render("home", {
-        urls: userUrls,
-        user: req.user,
-    });
-});
+router.get("/", restrictToLoggedinUserOnly, (req, res) => renderHome(req, res));
 
 module.exports = router;
