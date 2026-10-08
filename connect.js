@@ -8,13 +8,16 @@ async function connectToMongoDB(url) {
   }
 
   if (!connectionPromise) {
-    connectionPromise = mongoose.connect(url).then(
+    connectionPromise = mongoose.connect(url, {
+      serverSelectionTimeoutMS: 5000,
+    }).then(
       (connection) => {
         connectionPromise = undefined;
         return connection;
       },
       (err) => {
         connectionPromise = undefined;
+        console.error("MongoDB connection failed:", err.message);
         throw err;
       }
     );
